@@ -1,0 +1,17 @@
+[Desktop Entry]
+Categories=Development;IDE;
+Comment[en_US]=A cross-platform IDE for java
+Comment=A cross-platform IDE for java
+Exec=JAVA_HOME=/opt/openjdk/jdk13+33-20190916 "/home/hachi/JetBrains/idea-IC/bin/idea.sh" %f
+Icon=/home/hachi/JetBrains/idea-IC/bin/idea.svg
+Name[en_US]=IntelliJ IDEA
+Name=IntelliJ IDEA
+StartupNotify=true
+StartupWMClass=jetbrains-idea
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
