@@ -1,0 +1,21 @@
+[Desktop Entry]
+Categories=Development;IDE;
+Comment[en_US]=A cross-platform IDE for python
+Comment=A cross-platform IDE for python
+Exec=JAVA_HOME=/opt/openjdk/jdk13+33-20190916 "/home/hachi/JetBrains/pycharm/bin/pycharm.sh" %f
+GenericName[en_US]=
+GenericName=
+Icon=/home/hachi/JetBrains/pycharm/bin/pycharm.svg
+MimeType=
+Name=Pycharm
+Path=
+StartupNotify=true
+StartupWMClass=jetbrains-pycharm
+Terminal=false
+TerminalOptions=
+Type=Application
+Version=1.0
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
