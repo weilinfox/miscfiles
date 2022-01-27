@@ -1,0 +1,19 @@
+[Desktop Entry]
+Categories=chat;Network;
+Comment=A Linux client for QQ and more
+Comment=A Linux client for QQ and more
+Exec=/opt/icalingua/electron %u
+GenericName=
+GenericName=
+Icon=/opt/icalingua/resources/app/dist/electron/static/icons/512x512.png
+MimeType=
+Name=Icalingua
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
