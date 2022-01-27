@@ -1,0 +1,21 @@
+[Desktop Entry]
+Categories=Development;IDE;
+Comment[en_US]=A cross-platform IDE for golang
+Comment=A cross-platform IDE for golang
+Exec=JAVA_HOME=/opt/openjdk/jdk13+33-20190916 "/home/hachi/JetBrains/GoLand/bin/goland.sh" %f
+GenericName[en_US]=
+GenericName=
+Icon=/home/hachi/JetBrains/GoLand/bin/goland.svg
+MimeType=
+Name=GoLand
+Path=
+StartupNotify=true
+StartupWMClass=jetbrains-goland
+Terminal=false
+TerminalOptions=
+Type=Application
+Version=1.0
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
