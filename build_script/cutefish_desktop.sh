@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 # build cutefish desktop on Debian
+# use mk-build-deps to check dependencies
+# you can easily uninstall dependencies after use this script
+# for more information, run "man mk-build-deps"
+# weilinfox <weilin.king@qq.com>
 
 script_path=$(cd $(dirname $0); pwd)
 package_dir=cutefish_packages
@@ -10,19 +14,19 @@ cache_file=build.cache
 
 function check_commands() {
 	local com_arr=(
-		mk-build-deps --version
-		dpkg-buildpackage --version
-		dpkg-checkbuilddeps --version
-		unzip -v
-		git --version
-		sudo --version
+		mk-build-deps
+		dpkg-buildpackage
+		dpkg-checkbuilddeps
+		unzip
+		git
+		sudo
 	)
 	local arr_len=${#com_arr[@]}
-	for (( i = 0; i < ${arr_len}; i += 2 )); do
+	for com in ${com_arr[*]}; do
 		# echo ${com_arr[i]} 
-		if ! command ${com_arr[i]} ${com_arr[i+1]} > /dev/null 2>&1; then
-			echo command ${com_arr[i]} not found >&2
-			echo Maybe need to install devscripts and build-essential package?
+		if ! command -v ${com} > /dev/null 2>&1; then
+			echo command ${com} not found >&2
+			echo Maybe did not install devscripts and build-essential package?
 			exit 1
 		fi
 	done
