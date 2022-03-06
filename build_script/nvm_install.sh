@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 # this script check the latest version of nvm and download the official install script
 # for security consideration, the script will let you read the install script first
+# weilinfox <weilin.king@qq.com>
 
 script_path=$(cd $(dirname $0); pwd)
 

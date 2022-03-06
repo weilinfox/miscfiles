@@ -12,11 +12,38 @@ deb_dir=debs
 dbgsym_dir=dbgsym
 cache_file=build.cache
 
+# build commands
+mk_build_deps_cmd="mk-build-deps --install \
+			--root-cmd sudo \
+			--tool \"apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y\" \
+			--remove"
+dpkg_buildpackage_cmd="dpkg-buildpackage -b -uc -us"
+
+case $# in 
+	0)
+		;;
+	1)
+		if [[ $1 == "--noparallel" ]]; then
+			dpkg_buildpackage_cmd="${dpkg_buildpackage_cmd} -J1"
+		else
+			echo Invalid option $1
+			echo Use option --noparallel to build in single thread
+			exit 1
+		fi
+		;;
+	*)
+		echo Invalid options
+		echo Script accept at most one option
+		;;
+esac
+
 function check_commands() {
 	local com_arr=(
 		mk-build-deps
 		dpkg-buildpackage
 		dpkg-checkbuilddeps
+		equivs-build
+		equivs-control
 		unzip
 		git
 		sudo
@@ -27,6 +54,7 @@ function check_commands() {
 		if ! command -v ${com} > /dev/null 2>&1; then
 			echo command ${com} not found >&2
 			echo Maybe did not install devscripts and build-essential package?
+			echo For Ubuntu, equivs package is needed.
 			exit 1
 		fi
 	done
@@ -35,6 +63,7 @@ function check_commands() {
 function package_build() {
 	local build_path=${script_path}/${package_dir}/${build_dir}
 	local git_path=${build_path}/$2
+	# local build_cmd="${mk_build_deps_cmd} && ${dpkg_buildpackage_cmd}"
 
 	# if git repo exists, make it up to date
 	if [[ -d ${git_path} ]]; then
@@ -47,11 +76,9 @@ function package_build() {
 	if [[ $? -eq 0 && -d ${git_path} ]]; then
 		echo Start to build $2
 		cd ${git_path}
-		mk-build-deps --install \
-			--root-cmd sudo \
-			--tool "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y" \
-			--remove \
-			&& dpkg-buildpackage -b
+
+		eval ${mk_build_deps_cmd} || ( echo Error: nable to solve dependencies >&2; exit 1 )
+		eval ${dpkg_buildpackage_cmd}
 
 		# if build succeed, copy the package and clean the workspace
 		if [[ $? -eq 0 ]]; then
@@ -74,7 +101,10 @@ function package_build() {
 			echo $2 >> ${script_path}/${package_dir}/${cache_file}
 		else
 			# quit when error occured
-			echo Package $2 build failed >&2
+			echo Error: unable to build package $2 >&2
+			# build in parallel may cause strange build error on Debian 11 and Ubuntu 20.04
+			echo Try to use --noparallel option?
+
 			exit 1
 		fi
 		
@@ -85,17 +115,22 @@ function package_build() {
 	cd ${script_path}
 }
 
-if grep -Eqi Debian /etc/issue || grep -Eqi Debian /etc/*-release; then
+if grep -Eqi Debian /etc/issue || grep -Eq Debian /etc/*-release; then
 	distro=Debian
 	pkgmn=apt
+elif grep -Eqi Ubuntu /etc/issue || grep -Eq Ubuntu /etc/*-release; then
+	distro=Ubuntu
+	pkgmn=apt
 # package on Loongnix is too old to build cutefish
-#elif grep -Eqi Loongnix /etc/issue || grep -Eqi Loongnix /etc/*-release; then
+#elif grep -Eqi Loongnix /etc/issue || grep -Eq Loongnix /etc/*-release; then
 #	distro=Loongnix
 #	pkgmn=apt
 else
 	echo This script does not support your distribution
 	exit 1
 fi
+
+echo Build for $distro
 
 echo Check needed commands
 check_commands
@@ -159,3 +194,4 @@ done
 
 echo
 echo Run "apt-cache search --names-only ^.*?-build-deps$" to find build-dependencies to remove
+
