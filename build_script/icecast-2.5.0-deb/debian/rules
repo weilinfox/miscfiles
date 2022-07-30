@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+# -*- mode: makefile; coding: utf-8 -*-
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- --program-transform-name="s/icecast$$/icecast2/" --sysconfdir=/etc/icecast2
+
+override_dh_auto_build:
+	dh_auto_build -- PACKAGE=icecast2 pkgdatadir=/usr/share/icecast2
+
+DEB_DESTDIR=$(CURDIR)/debian/icecast2
+override_dh_auto_install:
+	dh_auto_install -- pkgdatadir=/usr/share/icecast2 docdir=/usr/share/doc/icecast2
+	# Debian has a central copy of the GPL, no need to distribute again, and remove the extra changelog.
+	rm -f $(DEB_DESTDIR)/usr/share/doc/icecast2/COPYING
+	rm -f $(DEB_DESTDIR)/usr/share/doc/icecast2/ChangeLog
+	# Move XSLT templates and CSS files to /etc and replace with symlinks
+	for file in `cd $(DEB_DESTDIR)/usr/share && find icecast2 -type f \( -name *.xsl -or -name *.css \)`; do \
+		mkdir -p $(DEB_DESTDIR)/etc/`dirname $$file`; \
+		mv $(DEB_DESTDIR)/usr/share/$$file $(DEB_DESTDIR)/etc/$$file; \
+		ln -s /etc/$$file $(DEB_DESTDIR)/usr/share/$$file; \
+	done
+
+override_dh_installinit:
+	dh_installinit --no-enable

@@ -1,0 +1,45 @@
+Description: Build with wolfSSL
+Author: Felix Lechner <felix.lechner@lease-up.com>
+Forwarded: https://gitlab.xiph.org/xiph/icecast-server/issues/2379
+---
+
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/configure.in
++++ b/configure.in
+@@ -131,8 +131,15 @@ XIPH_PATH_OPENSSL([
+     XIPH_VAR_APPEND([XIPH_CPPFLAGS],[$OPENSSL_CFLAGS])
+     XIPH_VAR_APPEND([XIPH_LDFLAGS],[$OPENSSL_LDFLAGS])
+     XIPH_VAR_PREPEND([XIPH_LIBS],[$OPENSSL_LIBS])
+-    ],
+-    [ AC_MSG_NOTICE([SSL disabled!])
++    ],[
++    AC_CHECK_HEADERS([wolfssl/openssl/ssl.h],[
++        AC_SEARCH_LIBS([wolfSSL_CTX_new], [wolfssl])
++        AC_DEFINE([HAVE_OPENSSL], 1)
++        AC_DEFINE([HAVE_WOLFSSL], 1, [Define if you have libwolfssl.])
++        AC_MSG_NOTICE([Falling back to WolfSSL])
++        ],[
++        AC_MSG_NOTICE([SSL disabled!])
++        ])
+     ])
+ 
+ dnl Make substitutions
+--- a/src/connection.h
++++ b/src/connection.h
+@@ -16,9 +16,16 @@
+ #include <sys/types.h>
+ #include <time.h>
+ #ifdef HAVE_OPENSSL
++#ifdef HAVE_WOLFSSL
++#include <wolfssl/options.h>
++#include <wolfssl/ssl.h>
++#include <wolfssl/openssl/ssl.h>
++#include <wolfssl/openssl/err.h>
++#else
+ #include <openssl/ssl.h>
+ #include <openssl/err.h>
+ #endif
++#endif
+ 
+ #include "compat.h"
+ #include "httpp/httpp.h"

@@ -1,0 +1,79 @@
+#! /bin/sh
+# postinst script for icecast2
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+case "$1" in
+    configure|reconfigure)
+
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+	exit 0
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+# Move configuration file to current location, if an old one exists
+# and the init.d script configuration file was updated
+if [ -f /etc/icecast.xml ] && grep -q /etc/icecast2/ /etc/default/icecast2; then
+    echo "It seems you have an old configuration lying around at"
+    echo "/etc/icecast.xml. You will need to manually merge with"
+    echo "the current configuration at /etc/icecast2/icecast.xml."
+    echo
+    echo "See /usr/share/doc/icecast2/examples for new configuration options."
+fi
+
+getent group icecast >/dev/null 2>&1 || \
+	addgroup --system --quiet icecast
+id icecast2 >/dev/null 2>&1 || \
+	adduser --system --quiet --disabled-password --disabled-login \
+	--home /usr/share/icecast2 --no-create-home --ingroup icecast icecast2
+
+# Handle upgrades that didn't have icecast2 enabled.
+wasenabled=$(. /etc/default/icecast2; echo $ENABLE)
+if [ ! -f /etc/default/icecast2 ] || [ "$wasenabled" != "true" ] ;then
+	update-rc.d icecast2 disable >/dev/null || true
+fi
+
+# set passwords
+db_get icecast2/icecast-setup
+if test "$RET" = "true"; then
+	if [ -f /etc/default/icecast2 -a -f /etc/icecast2/icecast.xml ]; then
+		echo "Configuring icecast2.." >&2
+		update-rc.d icecast2 defaults >/dev/null
+
+		db_get icecast2/sourcepassword
+		ICESOURCE=$RET
+		db_get icecast2/relaypassword
+		ICERELAY=$RET
+		db_get icecast2/adminpassword
+		ICEADMIN=$RET
+		db_get icecast2/hostname
+		ICEHOST=$RET
+		sed -i 	-e "s|<source-password>[^<]*</source-password>|<source-password>$ICESOURCE</source-password>|" \
+			-e "s|<relay-password>[^<]*</relay-password>|<relay-password>$ICERELAY</relay-password>|" \
+			-e "s|<admin-password>[^<]*</admin-password>|<admin-password>$ICEADMIN</admin-password>|" \
+			-e "s|<hostname>[^<]*</hostname>|<hostname>$ICEHOST</hostname>|" \
+			/etc/icecast2/icecast.xml 2>/dev/null 1>&2 || true
+		echo "Done Configuring icecast2.." >&2
+	fi
+fi
+
+# Tell debconf we're done, so it doesn't get confused when we start the daemon.
+db_stop
+
+chgrp icecast /etc/icecast2/icecast.xml
+chown icecast2:adm /var/log/icecast2
+# Tightened permissions for the config file
+chmod g+r,o-rwx /etc/icecast2/icecast.xml
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,33 @@
+Description: Migrate from using xslt-config to pkg-config
+Author: Unit 193 <unit193@ubuntu.com>
+
+---
+ configure.in |   17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+--- a/configure.in
++++ b/configure.in
+@@ -53,9 +53,20 @@ XIPH_NET
+ 
+ dnl -- configure options --
+ 
+-XIPH_PATH_XSLT
+-XIPH_VAR_APPEND([XIPH_CPPFLAGS],[$XSLT_CFLAGS])
+-XIPH_VAR_PREPEND([XIPH_LIBS],[$XSLT_LIBS])
++PKG_CHECK_MODULES([LIBXSLT], [libxslt], [], [
++  AC_MSG_ERROR([${LIBXSLT_PKG_ERRORS}. libxslt is required.])
++])
++
++CFLAGS="${CFLAGS} ${LIBXSLT_CFLAGS}"
++LIBS="${LIBS} ${LIBXSLT_LIBS}"
++
++PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [], [
++  AC_MSG_ERROR([${LIBXML2_PKG_ERRORS}. libxml2 is required.])
++])
++AC_CHECK_FUNCS([xsltSaveResultToString])
++
++CFLAGS="${CFLAGS} ${LIBXML2_CFLAGS}"
++LIBS="${LIBS} ${LIBXML2_LIBS}"
+ 
+ XIPH_PATH_VORBIS([
+     XIPH_VAR_APPEND([XIPH_CPPFLAGS],[$VORBIS_CFLAGS])

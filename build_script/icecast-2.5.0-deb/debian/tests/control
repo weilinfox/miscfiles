@@ -1,0 +1,2 @@
+Tests: test-daemon
+Depends: @, curl

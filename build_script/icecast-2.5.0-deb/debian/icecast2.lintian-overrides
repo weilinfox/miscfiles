@@ -1,0 +1,2 @@
+# In the postinst script, we handle upgrades that used /etc/default/icecast2 to enable and disable the service.
+icecast2: duplicate-updaterc.d-calls-in-postinst icecast2

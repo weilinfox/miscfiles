@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+
+# Dependency on NSL is not really required on some architectures.
+DEB_LDFLAGS_MAINT_APPEND := -Wl,--as-needed -Wl,-z,defs
+DEB_BUILD_MAINT_OPTIONS := hardening=+all
+DEB_CXXFLAGS_MAINT_APPEND := -std=c++11
+include /usr/share/dpkg/default.mk
+
+POLICY_TARGETS := binary binary-arch binary-indep build build-arch	\
+build-indep clean
+.PHONY: $(POLICY_TARGETS)
+$(POLICY_TARGETS):
+	dh $@ --with autoreconf
+
+# lame lacks pkg-config support and requires an explicit option.
+
+# vorbis, opus, twolame, alsa, pulseaudio, jack, samplerate are listed
+# in Build-Depends and selected automatically if present.
+
+# faac, aacplus are not in Debian main. Explicitly disable them so
+# that the build does not change if they are installed or removed.
+
+# Trick sysconfdir to install the examples in the right place.
+.PHONY: override_dh_auto_configure
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		$(foreach v,CFLAGS CPPFLAGS CXXFLAGS LDFLAGS,"$(v)=$($(v))") \
+		--with-lame-prefix=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		--sysconfdir=/usr/share/doc/darkice/examples \
+		--without-aacplus \
+		--without-faac

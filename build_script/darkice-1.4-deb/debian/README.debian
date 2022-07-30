@@ -1,0 +1,9 @@
+DarkIce for Debian
+----------------------
+
+A sample configuration in installed into /usr/share/doc/darkice/examples.
+In order to use DarkIce, please copy this example to your preferred
+configuration directory, make any required changes for your site and reference
+it using darkice -c <config file>.
+
+ -- Nicolas Boulenguez <nicolas@debian.org>, Fri,  1 Jul 2016 23:59:37 +0200

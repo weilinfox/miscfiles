@@ -1,0 +1,25 @@
+#!/bin/sh
+
+server=localhost
+
+set -e
+
+PATH=/usr/sbin:$PATH
+export PATH
+
+at_exit() {
+    echo "info: test exiting"
+}
+
+trap at_exit INT TERM EXIT
+
+echo "info: reporting daemon status"
+if service icecast2 status ; then
+    echo "success: service reported success"
+fi
+
+if curl -s http://$server:8000/ | grep -q icecast.org ; then
+    echo "success: HTTP request to Icecast server worked."
+else
+    echo "failure: HTTP request to Icecast server did not contain the words icecast.org."
+fi
